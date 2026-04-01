@@ -1,7 +1,7 @@
 -- DDL
 
 -- МОДУЛЬ КЛИЕНТОВ
-CREATE TABLE clients
+CREATE TABLE Clients
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     first_name VARCHAR(64) NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE clients
 );
 
 
-CREATE TABLE client_contacts
+CREATE TABLE Client_Contacts
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     client_id INTEGER NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE client_contacts
 );
 
 
-CREATE TABLE client_documents
+CREATE TABLE Client_Documents
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     client_id INTEGER NOT NULL,
@@ -42,22 +42,23 @@ CREATE TABLE client_documents
 );
 
 
-CREATE TABLE client_employee
+CREATE TABLE Client_Employment
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     client_id INTEGER NOT NULL UNIQUE,
 
     status_id INTEGER NOT NULL,
     monthly_income INTEGER,
-    income_currency VARCHAR(3) DEFAULT 'RUB',
+    currency_id INTEGER NOT NULL,
     is_verified BOOLEAN DEFAULT false,
 
     FOREIGN KEY (status_id) REFERENCES employment_status(id),
+    FOREIGN KEY (currency_id) REFERENCES currency(id),
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 );
 
 
-CREATE TABLE client_address
+CREATE TABLE Client_Addresses
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     client_id INTEGER NOT NULL UNIQUE,
@@ -69,7 +70,7 @@ CREATE TABLE client_address
 );
 
 
-CREATE TABLE client_verification
+CREATE TABLE Client_Verifications
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     client_id INTEGER NOT NULL UNIQUE,
@@ -84,102 +85,85 @@ CREATE TABLE client_verification
 );
 
 
-CREATE TABLE contact_type
+CREATE TABLE Contact_Type
 (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE -- telephone, email, tg
 );
 
-CREATE TABLE document_type
+CREATE TABLE Document_Type
 (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE -- passport, snils, inn
 );
 
-CREATE TABLE employment_status
+CREATE TABLE Employment_Status
 (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE -- employed, self_employed, business, unemployed
 );
 
-CREATE TABLE kyc_status
+CREATE TABLE Kyc_Status
 (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE -- pending, rejected, edd
 );
 
-CREATE TABLE aml_status
+CREATE TABLE Aml_Status
 (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE -- low, medium, high
 );
 
 
+
+
+
 -- МОДУЛЬ СЧЕТОВ
-CREATE TABLE accounts
+CREATE TABLE Accounts
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     client_id INTEGER NOT NULL,
 
-    balance INTEGER NOT NULL,
-
     status_id INTEGER NOT NULL,
     currency_id INTEGER NOT NULL,
-    type_id INTEGER NOT NULL,
-    account_type_id INTEGER NOT NULL, -- id в соответствующей таблице например в credit
 
     created_at DATE DEFAULT CURRENT_DATE,
 
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
     FOREIGN KEY (status_id) REFERENCES account_status(id),
-    FOREIGN KEY (currency_id) REFERENCES currency(id),
-    FOREIGN KEY (type_id) REFERENCES account_types(id)
+    FOREIGN KEY (currency_id) REFERENCES currency(id)
 );
 
 
-CREATE TABLE account_status
+CREATE TABLE Account_Balances
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_id INTEGER NOT NULL,
+
+    available_balance INTEGER NOT NULL DEFAULT 0,
+    balance INTEGER NOT NULL DEFAULT 0,
+
+    updated_at TIMESTAMP,
+    FOREIGN KEY (account_id) REFERENCES accounts(id)
+);
+
+
+CREATE TABLE Account_Status
 (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE -- open, closed, blocked, frozen
 );
 
-CREATE TABLE currency
-(
-    id INTEGER PRIMARY KEY,
-    name VARCHAR(3) NOT NULL UNIQUE -- USD, RUB, YAN
-);
-
-CREATE TABLE account_types
-(
-    id INTEGER PRIMARY KEY,
-    name VARCHAR(64) NOT NULL UNIQUE
-);
 
 
--- МОДУЛЬ ДЕБЕТОВЫХ СЧЕТОВ
-CREATE TABLE debit_accounts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, -- это account_type_id из accounts
-    plan_id INTEGER NOT NULL,
-
-    opened_at DATE NOT NULL DEFAULT CURRENT_DATE,
-    closed_at DATE,
-
-    FOREIGN KEY (plan_id) REFERENCES debit_plans(id)
-);
-
-CREATE TABLE debit_plans
-(
-    id INTEGER PRIMARY KEY,
-    monthly_fee INTEGER DEFAULT 0, -- плата за обслуживание
-    interest_rate DECIMAL DEFAULT 0, -- процент на остаток
-    transfer_fee DECIMAL DEFAULT 0 -- процент на остаток
-);
 
 
 -- МОДУЛЬ ВКЛАДОВ
-CREATE TABLE deposits
+CREATE TABLE Deposits
 (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, -- это account_type_id из accounts
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_id INTEGER NOT NULL,
     plan_id INTEGER NOT NULL,
     status_id INTEGER NOT NULL, -- active, closed, early_closed
 
@@ -195,10 +179,11 @@ CREATE TABLE deposits
     -- Счет для зачисления процентов и возврата
 
     FOREIGN KEY (status_id) REFERENCES deposit_status(id),
-    FOREIGN KEY (plan_id) REFERENCES deposit_plan(id)
+    FOREIGN KEY (plan_id) REFERENCES deposit_plan(id),
+    FOREIGN KEY (account_id) REFERENCES accounts(id)
 );
 
-CREATE TABLE deposit_plan
+CREATE TABLE Deposit_Plan
 (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE,
@@ -210,23 +195,25 @@ CREATE TABLE deposit_plan
     interest_rate DECIMAL NOT NULL
 );
 
-CREATE TABLE deposit_status
+CREATE TABLE Deposit_Status
 (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE -- active, closed, early_closed
 );
 
+
+
+
 -- МОУДЛЬ КРЕДИТОВ
-CREATE TABLE credits (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, -- это account_type_id из accounts
+CREATE TABLE Credits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     credit_number VARCHAR(20) UNIQUE NOT NULL, -- номер кредитного договора
 
-    client_id INTEGER NOT NULL,
     plan_id INTEGER NOT NULL,
     status_id INTEGER NOT NULL,
     currency_id INTEGER NOT NULL,
 
-    disbursement_account_id INTEGER NOT NULL, -- accounts.id (куда дали деньги)
+    loan_account_id INTEGER NOT NULL, -- accounts.id (куда дали деньги)
     repayment_account_id INTEGER NOT NULL,    -- accounts.id (откуда платят)
 
     principal_amount INTEGER NOT NULL, -- сумма кредита
@@ -238,11 +225,10 @@ CREATE TABLE credits (
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (client_id) REFERENCES clients(id),
     FOREIGN KEY (plan_id) REFERENCES credit_plans(id),
     FOREIGN KEY (status_id) REFERENCES credit_status(id),
     FOREIGN KEY (currency_id) REFERENCES currency(id),
-    FOREIGN KEY (disbursement_account_id) REFERENCES accounts(id),
+    FOREIGN KEY (loan_account_id) REFERENCES accounts(id),
     FOREIGN KEY (repayment_account_id) REFERENCES accounts(id),
 
     CHECK (principal_amount > 0),
@@ -251,7 +237,7 @@ CREATE TABLE credits (
 );
 
 
-CREATE TABLE credit_plans (
+CREATE TABLE Credit_Plans (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE, -- Потребительский, Ипотека, Автокредит
 
@@ -270,13 +256,13 @@ CREATE TABLE credit_plans (
     is_active BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE credit_status (
+CREATE TABLE Credit_Status (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE -- active, closed, overdue, restructured, approved, rejected
 );
 
 
-CREATE TABLE credit_payment_schedule (
+CREATE TABLE Credit_Payment_Schedules (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     credit_id INTEGER NOT NULL,
 
@@ -303,13 +289,13 @@ CREATE TABLE credit_payment_schedule (
     CHECK (total_amount = principal_amount + interest_amount)
 );
 
-CREATE TABLE payment_status
+CREATE TABLE Payment_Status
 (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) NOT NULL UNIQUE
 );
 
-CREATE TABLE credit_payments (
+CREATE TABLE Credit_Payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     credit_id INTEGER NOT NULL,
 
@@ -328,18 +314,20 @@ CREATE TABLE credit_payments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (credit_id) REFERENCES credits(id) ON DELETE CASCADE,
-    FOREIGN KEY (schedule_id) REFERENCES credit_payment_schedule(id),
+    FOREIGN KEY (schedule_id) REFERENCES credit_payment_schedules(id),
 
     CHECK (amount = principal_paid + interest_paid + late_fee_paid),
     CHECK (amount > 0)
 );
 
 
+
+
+
 -- МОДУЛЬ КАРТ
-CREATE TABLE cards (
+CREATE TABLE Cards (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    debit_account_id INTEGER NOT NULL,
-    card_type_id INTEGER NOT NULL,
+    account_id INTEGER NOT NULL,
     card_category_id INTEGER NOT NULL,
     status_id INTEGER NOT NULL,
 
@@ -353,32 +341,51 @@ CREATE TABLE cards (
     activated_date DATE DEFAULT CURRENT_DATE,
     pin_attempts INTEGER DEFAULT 0,
 
-    FOREIGN KEY (debit_account_id) REFERENCES debit_accounts(id),
-    FOREIGN KEY (card_type_id) REFERENCES card_type(id),
+    FOREIGN KEY (account_id) REFERENCES accounts(id),
     FOREIGN KEY (status_id) REFERENCES card_status(id),
     FOREIGN KEY (card_category_id) REFERENCES card_category(id)
 );
 
 
-CREATE TABLE card_type (
-    id INTEGER PRIMARY KEY,
-    type_code VARCHAR(20) UNIQUE NOT NULL -- visa_classic, mastercard_gold, mir
+CREATE TABLE Card_Authorizations -- HOLD
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    card_id INTEGER NOT NULL,
+    transaction_id INTEGER NOT NULL,
+    status_id INTEGER NOT NULL,
+
+    amount INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP,
+
+    FOREIGN KEY (status_id) REFERENCES authorization_status(id),
+    FOREIGN KEY (card_id) REFERENCES cards(id),
+    FOREIGN KEY (transaction_id) REFERENCES transactions(id)
 );
 
+CREATE TABLE Authorization_Status
+(
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(20) -- authorized, captured, expired
+);
 
-CREATE TABLE card_status (
+CREATE TABLE Card_Status (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     status_code VARCHAR(64) NOT NULL UNIQUE -- active, blocked, expired, lost
 );
 
-CREATE TABLE card_category (
+CREATE TABLE Card_Category (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(64) NOT NULL UNIQUE -- standard, silver, gold
 );
 
 
+
+
+
 -- Модуль транзакции
-CREATE TABLE transactions (
+CREATE TABLE Transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     transaction_uuid VARCHAR(36) UNIQUE NOT NULL, -- глобальный уникальный ID
 
@@ -387,11 +394,13 @@ CREATE TABLE transactions (
 
     amount INTEGER NOT NULL,
     currency_id INTEGER NOT NULL,
+    mcc_id INTEGER NOT NULL,
 
     -- Временные метки
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP,
 
+    FOREIGN KEY (mcc_id) REFERENCES mcc_codes(id),
     FOREIGN KEY (type_id) REFERENCES transaction_types(id),
     FOREIGN KEY (status_id) REFERENCES transaction_status(id),
     FOREIGN KEY (currency_id) REFERENCES currency(id),
@@ -399,29 +408,138 @@ CREATE TABLE transactions (
     CHECK (amount != 0)
 );
 
-
-CREATE TABLE ledger_entries
+CREATE TABLE Transaction_Parties
 (
-    ID INTEGER PRIMARY KEY AUTOINCREMENT,
-    amount INTEGER NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-    account_id INTEGER NOT NULL,
     transaction_id INTEGER NOT NULL,
 
-    FOREIGN KEY (account_id) REFERENCES accounts(ID),
-    FOREIGN KEY (transaction_id) REFERENCES transactions(ID),
+    account_id INTEGER, -- внутренний счет в банке
+    external_account_number VARCHAR(32), -- для межбанка
+    bank_id INTEGER, -- БИК для external_account_number
 
-    CHECK (amount != 0)
+    direction_id INTEGER NOT NULL, -- 'source' или 'destination'
+
+    FOREIGN KEY (direction_id) REFERENCES directions(id),
+    FOREIGN KEY (transaction_id) REFERENCES transactions(id),
+    FOREIGN KEY (account_id) REFERENCES accounts(id),
+    FOREIGN KEY (bank_id) REFERENCES banks(id)
 );
 
+CREATE TABLE Interbank_Settlements
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    transaction_id INTEGER NOT NULL,
 
-CREATE TABLE transaction_status (
+    bank_id INTEGER NOT NULL, -- БИК
+    direction_id INTEGER NOT NULL, -- incoming, outgoing
+    amount INTEGER NOT NULL,
+    settlement_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (direction_id) REFERENCES directions(id),
+    FOREIGN KEY (bank_id) REFERENCES banks(id),
+    FOREIGN KEY (transaction_id) REFERENCES transactions(id)
+);
+
+CREATE TABLE Ledger_Entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    transaction_id INTEGER NOT NULL,
+    account_id INTEGER NOT NULL,
+
+    debit INTEGER DEFAULT 0,
+    credit INTEGER DEFAULT 0,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (transaction_id) REFERENCES transactions(id),
+    FOREIGN KEY (account_id) REFERENCES accounts(id),
+
+    CHECK (debit >= 0),
+    CHECK (credit >= 0),
+    CHECK (debit + credit > 0)
+);
+
+CREATE TABLE Transaction_Status (
     id INTEGER PRIMARY KEY,
     name VARCHAR(64) UNIQUE NOT NULL -- pending, completed, failed, cancelled, reversed
 );
 
-
-CREATE TABLE transaction_types (
+CREATE TABLE Transaction_Types
+(
     id INTEGER PRIMARY KEY,
-    code VARCHAR(30) UNIQUE NOT NULL -- deposit, withdrawal, transfer, interest, fee
+    code VARCHAR(32) UNIQUE NOT NULL
 );
+/*
+internal_transfer
+interbank_transfer
+card_payment
+deposit_open
+deposit_interest
+credit_payment
+*/
+
+CREATE TABLE Clearing_Transactions
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    authorization_id INTEGER,
+    transaction_id INTEGER,
+    external_bank VARCHAR(20),
+    amount INTEGER NOT NULL,
+    settlement_date DATE,
+
+    FOREIGN KEY (authorization_id) REFERENCES card_authorizations(id),
+    FOREIGN KEY (transaction_id) REFERENCES transactions(id)
+);
+
+CREATE TABLE Directions
+(
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(16) NOT NULL -- in, out
+);
+
+
+
+
+CREATE TABLE Currency
+(
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(3) NOT NULL UNIQUE -- USD, RUB, YAN
+);
+
+CREATE TABLE Banks
+(
+    id INTEGER PRIMARY KEY NOT NULL,
+    name VARCHAR(64) NOT NULL UNIQUE,
+    CHECK(id >= 100000000 AND id <= 999999999) -- БИК для россий начинается с 4
+);
+
+CREATE TABLE Mcc_Codes ( -- Merchant Category Code
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(128) NOT NULL,
+    CHECK(id >= 1000 AND id <= 9999)
+);
+
+
+/*
+ВНУТРИ БАНКА
+Инициирование ->
+Проверка доступного баланса ->
+Internal ledger ->
+Баланс получателя обновляется почти сразу
+
+МЕЖБАНК
+Инициирование ->
+Дебет клиента А ->
+Клиринг/передача через ЦБ ->
+Кредит счета клиента В ->
+Баланс получателя обновляется
+
+ЭКВАЙРИНГ
+Авторизация (HOLD) ->
+Клиринг через платёжную систему ->
+Списание с ledger ->
+Merchant получает деньги ->
+Клиент видит completed
+*/
