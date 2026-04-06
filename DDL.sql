@@ -9,6 +9,7 @@ CREATE TABLE Clients
     last_name VARCHAR(64) NOT NULL,
     password_hash VARCHAR(128) NOT NULL,
 
+    is_male BOOLEAN NOT NULL,
     birth_date DATE NOT NULL,
     created_at DATE NOT NULL DEFAULT CURRENT_DATE
 );

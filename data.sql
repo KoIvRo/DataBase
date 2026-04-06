@@ -133,15 +133,15 @@ INSERT INTO Banks (id, name) VALUES
 (456789123, 'Альфа-Банк');
 
 -- Добавление системного пользователя
-INSERT INTO Clients (id, first_name, middle_name, last_name, password_hash, birth_date, created_at)
-VALUES (0, 'SYSTEM', NULL, 'SYSTEM', 'system_hash', '1970-01-01', CURRENT_DATE);
+INSERT INTO Clients (id, first_name, middle_name, last_name, password_hash, birth_date, created_at, is_male)
+VALUES (0, 'SYSTEM', NULL, 'SYSTEM', 'system_hash', '1970-01-01', CURRENT_DATE, true);
 
 -- Основные клиенты
-INSERT INTO Clients (id, first_name, middle_name, last_name, password_hash, birth_date, created_at) VALUES
-(1, 'Иван', 'Романович', 'Коротаев', 'hash1234567890', '1990-01-01', CURRENT_DATE),
-(2, 'Ярослав', 'Романович', 'Романов', 'hash0987654321', '1985-05-15', CURRENT_DATE),
-(3, 'Анна', 'Сергеевна', 'Сидорова', 'hash1122334455', '1995-03-20', CURRENT_DATE),
-(4, 'Михаил', 'Алексеевич', 'Кузнецов', 'hash5544332211', '1988-07-10', CURRENT_DATE);
+INSERT INTO Clients (id, first_name, middle_name, last_name, password_hash, birth_date, created_at, is_male) VALUES
+(1, 'Иван', 'Романович', 'Коротаев', 'hash1234567890', '1990-01-01', CURRENT_DATE, true),
+(2, 'Ярослав', 'Романович', 'Романов', 'hash0987654321', '1985-05-15', CURRENT_DATE, true),
+(3, 'Анна', 'Сергеевна', 'Сидорова', 'hash1122334455', '1995-03-20', CURRENT_DATE, false),
+(4, 'Михаил', 'Алексеевич', 'Кузнецов', 'hash5544332211', '1988-07-10', CURRENT_DATE, true);
 
 -- client_contacts
 INSERT INTO Client_Contacts (client_id, contact_type_id, contact_value, is_verified) VALUES
@@ -397,3 +397,156 @@ INSERT INTO Ledger_Entries (transaction_id, account_id, credit) VALUES
 
 INSERT INTO Account_Balances (account_id, available_balance, balance, updated_at) VALUES
 (8, 235000, 235000, CURRENT_TIMESTAMP);
+
+-- Доп данные
+
+-- Новый клиент (женщина) с просрочкой по кредиту
+INSERT INTO Clients (id, first_name, middle_name, last_name, password_hash, birth_date, created_at, is_male)
+VALUES (5, 'Елена', 'Владимировна', 'Морозова', 'hash9988776655', '1992-11-05', CURRENT_DATE, false);
+
+INSERT INTO Client_Contacts (client_id, contact_type_id, contact_value, is_verified) VALUES
+(5, 1, '+79167778899', 1),
+(5, 2, 'elena@email.com', 1),
+(5, 3, '@elena_m', 1);
+
+INSERT INTO Client_Documents (client_id, document_type_id, document_value, expire_at) VALUES
+(5, 1, '4510 999888', '2034-11-05'),
+(5, 2, '456-789-123 01', NULL),
+(5, 3, '999888777666', NULL);
+
+INSERT INTO Client_Employment (client_id, status_id, monthly_income, currency_id, is_verified) VALUES
+(5, 1, 120000, 1, 1);
+
+INSERT INTO Client_Addresses (client_id, is_resident, city, country) VALUES
+(5, 1, 'Новосибирск', 'Россия');
+
+INSERT INTO Client_Verifications (client_id, kyc_status_id, aml_status_id, verified_at) VALUES
+(5, 1, 2, CURRENT_DATE);
+
+-- Счета для Елены
+INSERT INTO Accounts (id, client_id, status_id, currency_id, created_at) VALUES
+(11, 5, 1, 1, CURRENT_DATE),
+(12, 5, 1, 1, CURRENT_DATE);
+
+INSERT INTO Account_Balances (account_id, available_balance, balance, updated_at) VALUES
+(11, 350000, 350000, CURRENT_TIMESTAMP),
+(12, 0, 0, CURRENT_TIMESTAMP);
+
+-- Карта для Елены
+INSERT INTO Cards (account_id, card_category_id, status_id, card_number_hash, card_number_last4,
+                   card_holder_name, expiration_month, expiration_year, cvv_hash,
+                   issued_date, activated_date, pin_attempts) VALUES
+(11, 2, 1, 'hash_51251244445555', '5555', 'ELENA MOROZOVA', 8, 2029, 'cvv_hash_678',
+ CURRENT_DATE, CURRENT_DATE, 0);
+
+-- Кредит Елены с просрочкой (status_id = 3 - overdue)
+INSERT INTO Credits (credit_number, plan_id, status_id, currency_id,
+                     loan_account_id, repayment_account_id,
+                     principal_amount, remaining_amount,
+                     issued_date, end_date, payment_due_day, created_at)
+VALUES ('CRED-2024-0006', 2, 3, 1, 12, 11, 150000, 145000,
+        DATE(CURRENT_DATE, '-3 months'), DATE(CURRENT_DATE, '+9 months'), 20, CURRENT_TIMESTAMP);
+
+-- Просроченный платеж по кредиту Елены
+INSERT INTO Credit_Payment_Schedules (credit_id, status_id, payment_number, due_date,
+                                       principal_amount, interest_amount, total_amount,
+                                       remaining_balance, paid_date, paid_amount)
+VALUES ((SELECT id FROM Credits WHERE credit_number = 'CRED-2024-0006'), 3, 1, DATE(CURRENT_DATE, '-2 months'), 12500, 3125, 15625, 137500, NULL, NULL);
+
+-- Еще один кредит для Ивана с просрочкой
+INSERT INTO Credits (credit_number, plan_id, status_id, currency_id,
+                     loan_account_id, repayment_account_id,
+                     principal_amount, remaining_amount,
+                     issued_date, end_date, payment_due_day, created_at)
+VALUES ('CRED-2024-0007', 1, 3, 1, 4, 1, 300000, 280000,
+        DATE(CURRENT_DATE, '-5 months'), DATE(CURRENT_DATE, '+31 months'), 5, CURRENT_TIMESTAMP);
+
+-- Просроченный платеж по кредиту Ивана
+INSERT INTO Credit_Payment_Schedules (credit_id, status_id, payment_number, due_date,
+                                       principal_amount, interest_amount, total_amount,
+                                       remaining_balance, paid_date, paid_amount)
+VALUES ((SELECT id FROM Credits WHERE credit_number = 'CRED-2024-0007'), 3, 1, DATE(CURRENT_DATE, '-4 months'), 8333, 3875, 12208, 291667, NULL, NULL);
+
+-- Кредит Петра без просрочек (для сравнения)
+INSERT INTO Credits (credit_number, plan_id, status_id, currency_id,
+                     loan_account_id, repayment_account_id,
+                     principal_amount, remaining_amount,
+                     issued_date, end_date, payment_due_day, created_at)
+VALUES ('CRED-2024-0008', 1, 1, 1, 7, 5, 400000, 380000,
+        DATE(CURRENT_DATE, '-6 months'), DATE(CURRENT_DATE, '+30 months'), 8, CURRENT_TIMESTAMP);
+
+-- График платежей для кредита Петра
+INSERT INTO Credit_Payment_Schedules (credit_id, status_id, payment_number, due_date,
+                                       principal_amount, interest_amount, total_amount,
+                                       remaining_balance, paid_date, paid_amount) VALUES
+((SELECT id FROM Credits WHERE credit_number = 'CRED-2024-0008'), 2, 1, DATE(CURRENT_DATE, '-5 months'), 11111, 5167, 16278, 388889, DATE(CURRENT_DATE, '-5 months'), 16278),
+((SELECT id FROM Credits WHERE credit_number = 'CRED-2024-0008'), 2, 2, DATE(CURRENT_DATE, '-4 months'), 11111, 5167, 16278, 377778, DATE(CURRENT_DATE, '-4 months'), 16278),
+((SELECT id FROM Credits WHERE credit_number = 'CRED-2024-0008'), 1, 3, DATE(CURRENT_DATE, '-3 months'), 11111, 5167, 16278, 366667, NULL, NULL);
+
+-- Обновляем остаток по кредиту Петра
+UPDATE Credits SET remaining_amount = 366667 WHERE credit_number = 'CRED-2024-0008';
+
+-- Добавляем еще MCC коды для аналитики
+INSERT INTO Mcc_Codes (id, description) VALUES
+(5311, 'Универмаги и торговые центры'),
+(5722, 'Магазины электроники и бытовой техники'),
+(5999, 'Прочие розничные магазины'),
+(7011, 'Гостиницы и отели'),
+(7832, 'Кинотеатры'),
+(7922, 'Театры и концертные залы');
+
+-- Транзакция в ресторане (Иван)
+INSERT INTO Transactions (transaction_uuid, type_id, status_id, amount, currency_id, mcc_id, created_at, completed_at)
+VALUES ('cc0e8400-e29b-41d4-a716-446655440010', 3, 2, 8500, 1, 5812,
+        DATE(CURRENT_DATE, '-10 days'), DATE(CURRENT_DATE, '-10 days'));
+
+INSERT INTO Transaction_Parties (transaction_id, account_id, direction_id)
+VALUES ((SELECT id FROM Transactions WHERE transaction_uuid = 'cc0e8400-e29b-41d4-a716-446655440010'), 1, 2);
+
+INSERT INTO Ledger_Entries (transaction_id, account_id, credit)
+VALUES ((SELECT id FROM Transactions WHERE transaction_uuid = 'cc0e8400-e29b-41d4-a716-446655440010'), 1, 8500);
+
+INSERT INTO Account_Balances (account_id, available_balance, balance, updated_at) VALUES
+(1, 411153, 411153, CURRENT_TIMESTAMP);
+
+-- Транзакция на АЗС (Петр)
+INSERT INTO Transactions (transaction_uuid, type_id, status_id, amount, currency_id, mcc_id, created_at, completed_at)
+VALUES ('dd0e8400-e29b-41d4-a716-446655440011', 3, 2, 3200, 1, 5541,
+        DATE(CURRENT_DATE, '-5 days'), DATE(CURRENT_DATE, '-5 days'));
+
+INSERT INTO Transaction_Parties (transaction_id, account_id, direction_id)
+VALUES ((SELECT id FROM Transactions WHERE transaction_uuid = 'dd0e8400-e29b-41d4-a716-446655440011'), 5, 2);
+
+INSERT INTO Ledger_Entries (transaction_id, account_id, credit)
+VALUES ((SELECT id FROM Transactions WHERE transaction_uuid = 'dd0e8400-e29b-41d4-a716-446655440011'), 5, 3200);
+
+INSERT INTO Account_Balances (account_id, available_balance, balance, updated_at) VALUES
+(5, 980800, 980800, CURRENT_TIMESTAMP);
+
+-- Транзакция в электронике (Анна)
+INSERT INTO Transactions (transaction_uuid, type_id, status_id, amount, currency_id, mcc_id, created_at, completed_at)
+VALUES ('ee0e8400-e29b-41d4-a716-446655440012', 3, 2, 25000, 1, 5732,
+        DATE(CURRENT_DATE, '-20 days'), DATE(CURRENT_DATE, '-20 days'));
+
+INSERT INTO Transaction_Parties (transaction_id, account_id, direction_id)
+VALUES ((SELECT id FROM Transactions WHERE transaction_uuid = 'ee0e8400-e29b-41d4-a716-446655440012'), 8, 2);
+
+INSERT INTO Ledger_Entries (transaction_id, account_id, credit)
+VALUES ((SELECT id FROM Transactions WHERE transaction_uuid = 'ee0e8400-e29b-41d4-a716-446655440012'), 8, 25000);
+
+INSERT INTO Account_Balances (account_id, available_balance, balance, updated_at) VALUES
+(8, 210000, 210000, CURRENT_TIMESTAMP);
+
+-- Транзакция в магазине одежды (Елена)
+INSERT INTO Transactions (transaction_uuid, type_id, status_id, amount, currency_id, mcc_id, created_at, completed_at)
+VALUES ('ff0e8400-e29b-41d4-a716-446655440013', 3, 2, 12500, 1, 5691,
+        DATE(CURRENT_DATE, '-3 days'), DATE(CURRENT_DATE, '-3 days'));
+
+INSERT INTO Transaction_Parties (transaction_id, account_id, direction_id)
+VALUES ((SELECT id FROM Transactions WHERE transaction_uuid = 'ff0e8400-e29b-41d4-a716-446655440013'), 11, 2);
+
+INSERT INTO Ledger_Entries (transaction_id, account_id, credit)
+VALUES ((SELECT id FROM Transactions WHERE transaction_uuid = 'ff0e8400-e29b-41d4-a716-446655440013'), 11, 12500);
+
+INSERT INTO Account_Balances (account_id, available_balance, balance, updated_at) VALUES
+(11, 337500, 337500, CURRENT_TIMESTAMP);
