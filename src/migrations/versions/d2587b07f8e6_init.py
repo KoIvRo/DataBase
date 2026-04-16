@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 464ccdd0262a
+Revision ID: d2587b07f8e6
 Revises: 
-Create Date: 2026-04-16 20:11:09.640067
+Create Date: 2026-04-16 23:50:19.107861
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '464ccdd0262a'
+revision: str = 'd2587b07f8e6'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -29,7 +29,8 @@ def upgrade() -> None:
     op.create_table('Aml_Status',
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('Authorization_Status',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -59,21 +60,22 @@ def upgrade() -> None:
     sa.Column('is_male', sa.Boolean(), nullable=False),
     sa.Column('birth_date', sa.Date(), nullable=False),
     sa.Column('created_at', sa.Date(), server_default=sa.text('(CURRENT_DATE)'), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('middle_name', sa.String(length=64), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('Contact_Type',
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('Credit_Plans',
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('interest_rate', sa.DECIMAL(precision=5, scale=2), nullable=False),
     sa.Column('min_term_months', sa.Integer(), nullable=False),
     sa.Column('max_term_months', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('min_amount', sa.Integer(), nullable=True),
     sa.Column('max_amount', sa.Integer(), nullable=True),
     sa.Column('late_payment_fee', sa.Integer(), nullable=True),
@@ -97,7 +99,7 @@ def upgrade() -> None:
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('count_month', sa.Integer(), nullable=False),
     sa.Column('interest_rate', sa.DECIMAL(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('minimal_amount', sa.Integer(), nullable=True),
     sa.Column('early_withdrawal_rate', sa.DECIMAL(), nullable=True),
     sa.Column('early_withdrawal_fee', sa.DECIMAL(), nullable=True),
@@ -126,7 +128,8 @@ def upgrade() -> None:
     op.create_table('Kyc_Status',
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('Mcc_Codes',
     sa.Column('description', sa.String(length=128), nullable=False),
@@ -153,7 +156,7 @@ def upgrade() -> None:
     sa.Column('client_id', sa.Integer(), nullable=False),
     sa.Column('status_id', sa.Integer(), nullable=False),
     sa.Column('currency_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.Date(), server_default=sa.text('(CURRENT_DATE)'), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['Clients.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['currency_id'], ['Currency.id'], ),
@@ -164,7 +167,7 @@ def upgrade() -> None:
     sa.Column('client_id', sa.Integer(), nullable=False),
     sa.Column('city', sa.String(length=64), nullable=False),
     sa.Column('country', sa.String(length=64), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('is_resident', sa.Boolean(), server_default=sa.text('(true)'), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['Clients.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
@@ -174,7 +177,7 @@ def upgrade() -> None:
     sa.Column('client_id', sa.Integer(), nullable=False),
     sa.Column('contact_type_id', sa.Integer(), nullable=False),
     sa.Column('contact_value', sa.String(length=64), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('is_verified', sa.Boolean(), server_default=sa.text('(false)'), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['Clients.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['contact_type_id'], ['Contact_Type.id'], ondelete='CASCADE'),
@@ -184,17 +187,18 @@ def upgrade() -> None:
     sa.Column('client_id', sa.Integer(), nullable=False),
     sa.Column('document_type_id', sa.Integer(), nullable=False),
     sa.Column('document_value', sa.String(length=64), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('expire_at', sa.Date(), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['Clients.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['document_type_id'], ['Document_Type.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('document_type_id')
     )
     op.create_table('Client_Employment',
     sa.Column('client_id', sa.Integer(), nullable=False),
     sa.Column('status_id', sa.Integer(), nullable=False),
     sa.Column('currency_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('monthly_income', sa.Integer(), nullable=True),
     sa.Column('is_verified', sa.Boolean(), server_default=sa.text('(false)'), nullable=True),
     sa.ForeignKeyConstraint(['client_id'], ['Clients.id'], ondelete='CASCADE'),
@@ -207,7 +211,7 @@ def upgrade() -> None:
     sa.Column('client_id', sa.Integer(), nullable=False),
     sa.Column('kyc_status_id', sa.Integer(), nullable=False),
     sa.Column('aml_status_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('verified_at', sa.Date(), server_default=sa.text('(CURRENT_DATE)'), nullable=True),
     sa.ForeignKeyConstraint(['aml_status_id'], ['Aml_Status.id'], ),
     sa.ForeignKeyConstraint(['client_id'], ['Clients.id'], ondelete='CASCADE'),
@@ -222,7 +226,7 @@ def upgrade() -> None:
     sa.Column('amount', sa.Integer(), nullable=False),
     sa.Column('currency_id', sa.Integer(), nullable=False),
     sa.Column('mcc_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.Column('completed_at', sa.TIMESTAMP(), nullable=True),
     sa.CheckConstraint('amount != 0'),
@@ -236,7 +240,7 @@ def upgrade() -> None:
     sa.Column('account_id', sa.Integer(), nullable=False),
     sa.Column('available_balance', sa.Integer(), server_default=sa.text('0'), nullable=False),
     sa.Column('balance', sa.Integer(), server_default=sa.text('0'), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('updated_at', sa.TIMESTAMP(), nullable=True),
     sa.ForeignKeyConstraint(['account_id'], ['Accounts.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -251,7 +255,7 @@ def upgrade() -> None:
     sa.Column('expiration_month', sa.Integer(), nullable=False),
     sa.Column('expiration_year', sa.Integer(), nullable=False),
     sa.Column('issued_date', sa.Date(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('cvv_hash', sa.String(length=256), nullable=True),
     sa.Column('activated_date', sa.Date(), server_default=sa.text('(CURRENT_DATE)'), nullable=True),
     sa.Column('pin_attempts', sa.Integer(), server_default=sa.text('0'), nullable=True),
@@ -273,7 +277,7 @@ def upgrade() -> None:
     sa.Column('issued_date', sa.Date(), nullable=False),
     sa.Column('end_date', sa.Date(), nullable=False),
     sa.Column('payment_due_day', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.CheckConstraint('end_date > issued_date'),
     sa.CheckConstraint('payment_due_day BETWEEN 1 AND 31'),
@@ -293,7 +297,7 @@ def upgrade() -> None:
     sa.Column('amount', sa.Integer(), nullable=False),
     sa.Column('start_date', sa.Date(), nullable=False),
     sa.Column('end_date', sa.Date(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('partial_withdrawal_allowed', sa.Boolean(), server_default=sa.text('(FALSE)'), nullable=True),
     sa.ForeignKeyConstraint(['account_id'], ['Accounts.id'], ),
     sa.ForeignKeyConstraint(['plan_id'], ['Deposit_Plan.id'], ),
@@ -305,7 +309,7 @@ def upgrade() -> None:
     sa.Column('bank_id', sa.Integer(), nullable=False),
     sa.Column('direction_id', sa.Integer(), nullable=False),
     sa.Column('amount', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('settlement_date', sa.Date(), nullable=True),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.ForeignKeyConstraint(['bank_id'], ['Banks.id'], ),
@@ -316,7 +320,7 @@ def upgrade() -> None:
     op.create_table('Ledger_Entries',
     sa.Column('transaction_id', sa.Integer(), nullable=False),
     sa.Column('account_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('debit', sa.Integer(), server_default=sa.text('0'), nullable=True),
     sa.Column('credit', sa.Integer(), server_default=sa.text('0'), nullable=True),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
@@ -330,7 +334,7 @@ def upgrade() -> None:
     op.create_table('Transaction_Parties',
     sa.Column('transaction_id', sa.Integer(), nullable=False),
     sa.Column('direction_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('account_id', sa.Integer(), nullable=True),
     sa.Column('external_account_number', sa.String(length=32), nullable=True),
     sa.Column('bank_id', sa.Integer(), nullable=True),
@@ -345,7 +349,7 @@ def upgrade() -> None:
     sa.Column('transaction_id', sa.Integer(), nullable=False),
     sa.Column('status_id', sa.Integer(), nullable=False),
     sa.Column('amount', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.Column('expires_at', sa.TIMESTAMP(), nullable=True),
     sa.ForeignKeyConstraint(['card_id'], ['Cards.id'], ),
@@ -362,7 +366,7 @@ def upgrade() -> None:
     sa.Column('interest_amount', sa.Integer(), nullable=False),
     sa.Column('total_amount', sa.Integer(), nullable=False),
     sa.Column('remaining_balance', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('paid_date', sa.Date(), nullable=True),
     sa.Column('paid_amount', sa.Integer(), nullable=True),
     sa.CheckConstraint('interest_amount >= 0'),
@@ -375,7 +379,7 @@ def upgrade() -> None:
     )
     op.create_table('Clearing_Transactions',
     sa.Column('amount', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('authorization_id', sa.Integer(), nullable=True),
     sa.Column('transaction_id', sa.Integer(), nullable=True),
     sa.Column('external_bank', sa.String(length=20), nullable=True),
@@ -390,7 +394,7 @@ def upgrade() -> None:
     sa.Column('amount', sa.Integer(), nullable=False),
     sa.Column('principal_paid', sa.Integer(), nullable=False),
     sa.Column('interest_paid', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('late_fee_paid', sa.Integer(), server_default=sa.text('0'), nullable=True),
     sa.Column('schedule_id', sa.Integer(), nullable=True),
     sa.Column('transaction_id', sa.Integer(), nullable=True),

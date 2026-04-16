@@ -24,20 +24,20 @@ class AccountStatus(Base):
     __tablename__ = "Account_Status"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class AmlStatus(Base):
     __tablename__ = "Aml_Status"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class AuthorizationStatus(Base):
     __tablename__ = "Authorization_Status"
 
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[Optional[str]] = mapped_column(String(20))
 
 
@@ -53,14 +53,14 @@ class CardCategory(Base):
     __tablename__ = "Card_Category"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class CardStatus(Base):
     __tablename__ = "Card_Status"
 
     status_code: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class Clients(Base):
@@ -74,7 +74,7 @@ class Clients(Base):
     created_at: Mapped[datetime.date] = mapped_column(
         Date, nullable=False, server_default=text("CURRENT_DATE")
     )
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     middle_name: Mapped[Optional[str]] = mapped_column(String(64))
 
 
@@ -82,7 +82,7 @@ class ContactType(Base):
     __tablename__ = "Contact_Type"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class CreditPlans(Base):
@@ -94,7 +94,7 @@ class CreditPlans(Base):
     )
     min_term_months: Mapped[int] = mapped_column(Integer, nullable=False)
     max_term_months: Mapped[int] = mapped_column(Integer, nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     min_amount: Mapped[Optional[int]] = mapped_column(Integer)
     max_amount: Mapped[Optional[int]] = mapped_column(Integer)
     late_payment_fee: Mapped[Optional[int]] = mapped_column(Integer)
@@ -116,14 +116,14 @@ class CreditStatus(Base):
     __tablename__ = "Credit_Status"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class Currency(Base):
     __tablename__ = "Currency"
 
     name: Mapped[str] = mapped_column(String(3), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class DepositPlan(Base):
@@ -132,7 +132,7 @@ class DepositPlan(Base):
     name: Mapped[str] = mapped_column(String(64), nullable=False)
     count_month: Mapped[int] = mapped_column(Integer, nullable=False)
     interest_rate: Mapped[decimal.Decimal] = mapped_column(DECIMAL, nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     minimal_amount: Mapped[Optional[int]] = mapped_column(Integer)
     early_withdrawal_rate: Mapped[Optional[decimal.Decimal]] = mapped_column(DECIMAL)
     early_withdrawal_fee: Mapped[Optional[decimal.Decimal]] = mapped_column(DECIMAL)
@@ -142,35 +142,35 @@ class DepositStatus(Base):
     __tablename__ = "Deposit_Status"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class Directions(Base):
     __tablename__ = "Directions"
 
     name: Mapped[str] = mapped_column(String(16), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class DocumentType(Base):
     __tablename__ = "Document_Type"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class EmploymentStatus(Base):
     __tablename__ = "Employment_Status"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class KycStatus(Base):
     __tablename__ = "Kyc_Status"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class MccCodes(Base):
@@ -178,28 +178,28 @@ class MccCodes(Base):
     __table_args__ = (CheckConstraint("id >= 1000 AND id <= 9999"),)
 
     description: Mapped[str] = mapped_column(String(128), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class PaymentStatus(Base):
     __tablename__ = "Payment_Status"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class TransactionStatus(Base):
     __tablename__ = "Transaction_Status"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class TransactionTypes(Base):
     __tablename__ = "Transaction_Types"
 
     code: Mapped[str] = mapped_column(String(32), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class AccountBalances(Base):
@@ -212,7 +212,7 @@ class AccountBalances(Base):
     balance: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default=text("0")
     )
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
 
 
@@ -226,7 +226,7 @@ class Accounts(Base):
         ForeignKey("Account_Status.id"), nullable=False
     )
     currency_id: Mapped[int] = mapped_column(ForeignKey("Currency.id"), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     created_at: Mapped[Optional[datetime.date]] = mapped_column(
         Date, server_default=text("CURRENT_DATE")
     )
@@ -243,7 +243,7 @@ class CardAuthorizations(Base):
         ForeignKey("Authorization_Status.id"), nullable=False
     )
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
         TIMESTAMP, server_default=text("CURRENT_TIMESTAMP")
     )
@@ -265,7 +265,7 @@ class Cards(Base):
     expiration_month: Mapped[int] = mapped_column(Integer, nullable=False)
     expiration_year: Mapped[int] = mapped_column(Integer, nullable=False)
     issued_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     cvv_hash: Mapped[Optional[str]] = mapped_column(String(256))
     activated_date: Mapped[Optional[datetime.date]] = mapped_column(
         Date, server_default=text("CURRENT_DATE")
@@ -279,7 +279,7 @@ class ClearingTransactions(Base):
     __tablename__ = "Clearing_Transactions"
 
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     authorization_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("Card_Authorizations.id")
     )
@@ -296,7 +296,7 @@ class ClientAddresses(Base):
     )
     city: Mapped[str] = mapped_column(String(64), nullable=False)
     country: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     is_resident: Mapped[Optional[bool]] = mapped_column(
         Boolean, server_default=text("true")
     )
@@ -312,7 +312,7 @@ class ClientContacts(Base):
         ForeignKey("Contact_Type.id", ondelete="CASCADE"), nullable=False
     )
     contact_value: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     is_verified: Mapped[Optional[bool]] = mapped_column(
         Boolean, server_default=text("false")
     )
@@ -328,7 +328,7 @@ class ClientDocuments(Base):
         ForeignKey("Document_Type.id"), nullable=False, unique=True
     )
     document_value: Mapped[str] = mapped_column(String(64), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     expire_at: Mapped[Optional[datetime.date]] = mapped_column(Date)
 
 
@@ -342,7 +342,7 @@ class ClientEmployment(Base):
         ForeignKey("Employment_Status.id"), nullable=False
     )
     currency_id: Mapped[int] = mapped_column(ForeignKey("Currency.id"), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     monthly_income: Mapped[Optional[int]] = mapped_column(Integer)
     is_verified: Mapped[Optional[bool]] = mapped_column(
         Boolean, server_default=text("false")
@@ -361,7 +361,7 @@ class ClientVerifications(Base):
     aml_status_id: Mapped[int] = mapped_column(
         ForeignKey("Aml_Status.id"), nullable=False
     )
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     verified_at: Mapped[Optional[datetime.date]] = mapped_column(
         Date, server_default=text("CURRENT_DATE")
     )
@@ -388,7 +388,7 @@ class CreditPaymentSchedules(Base):
     interest_amount: Mapped[int] = mapped_column(Integer, nullable=False)
     total_amount: Mapped[int] = mapped_column(Integer, nullable=False)
     remaining_balance: Mapped[int] = mapped_column(Integer, nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     paid_date: Mapped[Optional[datetime.date]] = mapped_column(Date)
     paid_amount: Mapped[Optional[int]] = mapped_column(Integer)
 
@@ -407,7 +407,7 @@ class CreditPayments(Base):
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
     principal_paid: Mapped[int] = mapped_column(Integer, nullable=False)
     interest_paid: Mapped[int] = mapped_column(Integer, nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     late_fee_paid: Mapped[Optional[int]] = mapped_column(
         Integer, server_default=text("0")
     )
@@ -447,7 +447,7 @@ class Credits(Base):
     issued_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
     end_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
     payment_due_day: Mapped[int] = mapped_column(Integer, nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
         TIMESTAMP, server_default=text("CURRENT_TIMESTAMP")
     )
@@ -464,7 +464,7 @@ class Deposits(Base):
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
     start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
     end_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     partial_withdrawal_allowed: Mapped[Optional[bool]] = mapped_column(
         Boolean, server_default=text("FALSE")
     )
@@ -481,7 +481,7 @@ class InterbankSettlements(Base):
         ForeignKey("Directions.id"), nullable=False
     )
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     settlement_date: Mapped[Optional[datetime.date]] = mapped_column(Date)
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
         TIMESTAMP, server_default=text("CURRENT_TIMESTAMP")
@@ -500,7 +500,7 @@ class LedgerEntries(Base):
         ForeignKey("Transactions.id"), nullable=False
     )
     account_id: Mapped[int] = mapped_column(ForeignKey("Accounts.id"), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     debit: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("0"))
     credit: Mapped[Optional[int]] = mapped_column(Integer, server_default=text("0"))
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
@@ -517,7 +517,7 @@ class TransactionParties(Base):
     direction_id: Mapped[int] = mapped_column(
         ForeignKey("Directions.id"), nullable=False
     )
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     account_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Accounts.id"))
     external_account_number: Mapped[Optional[str]] = mapped_column(String(32))
     bank_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Banks.id"))
@@ -537,7 +537,7 @@ class Transactions(Base):
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
     currency_id: Mapped[int] = mapped_column(ForeignKey("Currency.id"), nullable=False)
     mcc_id: Mapped[int] = mapped_column(ForeignKey("Mcc_Codes.id"), nullable=False)
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
         TIMESTAMP, server_default=text("CURRENT_TIMESTAMP")
     )
