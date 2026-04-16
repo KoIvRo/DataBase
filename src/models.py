@@ -30,7 +30,7 @@ class AccountStatus(Base):
 class AmlStatus(Base):
     __tablename__ = "Aml_Status"
 
-    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
 
 
@@ -81,7 +81,7 @@ class Clients(Base):
 class ContactType(Base):
     __tablename__ = "Contact_Type"
 
-    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
 
 
@@ -169,7 +169,7 @@ class EmploymentStatus(Base):
 class KycStatus(Base):
     __tablename__ = "Kyc_Status"
 
-    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)
 
 
@@ -325,7 +325,7 @@ class ClientDocuments(Base):
         ForeignKey("Clients.id", ondelete="CASCADE"), nullable=False
     )
     document_type_id: Mapped[int] = mapped_column(
-        ForeignKey("Document_Type.id"), nullable=False
+        ForeignKey("Document_Type.id"), nullable=False, unique=True
     )
     document_value: Mapped[str] = mapped_column(String(64), nullable=False)
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True)

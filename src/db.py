@@ -7,14 +7,13 @@ DATABASE_URL = "sqlite:///./identifier.sqlite"
 
 engine = create_engine(DATABASE_URL)
 
-Base.metadata.create_all(engine)
-
 SessionLocal = sessionmaker(bind=engine)
 
 @contextmanager
 def get_session():
     """Получение соединения с бд."""
     session = SessionLocal()
+    Base.metadata.create_all(engine)
     try:
         yield session
     finally:
